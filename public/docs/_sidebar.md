@@ -1,0 +1,23 @@
+- Start
+  - [Overview and getting started](/)
+  - [How it works](how-it-works)
+- Guides
+  - [Your first animation](guide-first-animation)
+  - [Easing and curves](guide-easing)
+  - [Timeline and code, two ways](guide-code)
+  - [Product motion scenes](guide-product-motion)
+  - [Three.js scenes](guide-three)
+  - [Sharing and opening links](guide-share)
+  - [Moving to and from other libraries](guide-migrate)
+- Reference
+  - [The window and panels](ref-window)
+  - [Menus and actions](ref-menu)
+  - [Layers and Properties](ref-layers)
+  - [Timeline, keyframes and playback](ref-timeline)
+  - [Curve tool](ref-curve)
+  - [Code format](ref-code)
+  - [Three.js scene contract](ref-scene)
+  - [Share links](ref-share)
+  - [Templates](ref-templates)
+  - [Shortcuts](ref-shortcuts)
+  - [Themes](ref-themes)

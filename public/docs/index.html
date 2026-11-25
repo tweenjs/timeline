@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="color-scheme" content="light dark" />
+		<title>Timeline editor docs</title>
+		<link rel="stylesheet" href="vendor/core.min.css" />
+		<link rel="stylesheet" href="theme.css" />
+		<!-- Docsify: https://docsify.js.org (copied from node_modules by `npm run sync-helper`) -->
+		<script src="widgets.js"></script>
+	</head>
+	<body>
+		<div id="app">Loading the docs…</div>
+		<script>
+			// widgets.js has already added its plugin to window.$docsify.
+			Object.assign((window.$docsify = window.$docsify || {}), {
+				name: 'Timeline editor',
+				homepage: 'README.md',
+				loadSidebar: true,
+				subMaxLevel: 2,
+				auto2top: true,
+				maxLevel: 3,
+				search: {placeholder: 'Search the docs', noData: 'Nothing found', depth: 3},
+			})
+		</script>
+		<script src="vendor/docsify.min.js"></script>
+		<script src="vendor/search.min.js"></script>
+	</body>
+</html>
