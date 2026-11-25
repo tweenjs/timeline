@@ -1,0 +1,1385 @@
+@import './radix.css';
+
+/*
+ * The interface, in the look of Radix Themes (https://www.radix-ui.com/themes).
+ *
+ * Radix Themes is a React library, and this editor is not: so each control
+ * here is a native element, given the rules of the Radix Themes component it
+ * stands for (its sizes, colours, shadows and states, from Radix's own
+ * stylesheet), on Radix's tokens (radix.css). Which component is noted above
+ * each block. There is no script for the look: states are `:hover`,
+ * `:checked`, `[aria-pressed]`, `:popover-open` and `[open]`.
+ *
+ * Performance: what moves on every frame (layers, the playhead) is moved with
+ * `transform` and `opacity` only, on its own compositor layer, and panels are
+ * isolated with `contain`, so playback never lays out or paints the panels.
+ */
+:root {
+	/* The space between the cards, and around them. */
+	--gap: var(--space-2);
+	/* The timeline: the width of the layer names, the space before 0s, and the height of a row. */
+	--label: 250px;
+	--pad: 10px;
+	--row: 28px;
+	--key: var(--amber-9);
+	--head: var(--accent-9);
+}
+
+* {
+	box-sizing: border-box;
+	scrollbar-width: thin;
+	scrollbar-color: var(--gray-a6) transparent;
+}
+html,
+body {
+	height: 100%;
+	margin: 0;
+}
+body {
+	background: var(--color-background);
+	color: var(--gray-12);
+	font: var(--font-size-2) / var(--line-height-2) var(--default-font-family);
+	letter-spacing: var(--letter-spacing-2);
+	-webkit-font-smoothing: antialiased;
+	overflow: hidden;
+}
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	letter-spacing: inherit;
+	color: inherit;
+}
+#root {
+	display: contents;
+}
+
+/* The fields of a panel in a fieldset, which only disables them. */
+fieldset.lock {
+	display: contents;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+/* Nothing can be changed while it plays: what would be, says so. */
+:is(input, select, textarea, button):disabled,
+#app[data-playing] :is(.shape-layer, .keyframe, #curve .node, #curve .handle, #curve .shape, .row.prop .lane) {
+	cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------------
+ * Button: variant soft, colour grey. Size 2 (32px) in the bars and dialogs,
+ * size 1 (24px) inside the panels. `.solid` is variant solid in the accent
+ * colour, `.ghost` is variant ghost, and a toggle that is on
+ * (`aria-pressed`) is soft in the accent colour.
+ * ---------------------------------------------------------------------- */
+button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	gap: var(--space-2);
+	height: var(--space-6);
+	padding: 0 var(--space-3);
+	border: 0;
+	border-radius: var(--radius-2);
+	background: var(--gray-a3);
+	color: var(--gray-a11);
+	font-weight: var(--font-weight-medium);
+	white-space: nowrap;
+	user-select: none;
+	cursor: default;
+}
+button:hover {
+	background: var(--gray-a4);
+}
+button:active {
+	background: var(--gray-a5);
+}
+button:focus-visible {
+	outline: 2px solid var(--focus-8);
+	outline-offset: -1px;
+}
+button[aria-pressed='true'] {
+	background: var(--accent-a3);
+	color: var(--accent-a11);
+	&:hover {
+		background: var(--accent-a4);
+	}
+	&:active {
+		background: var(--accent-a5);
+	}
+}
+button.solid {
+	background: var(--accent-9);
+	color: var(--accent-contrast);
+	&:hover {
+		background: var(--accent-10);
+	}
+	&:active {
+		filter: brightness(0.92) saturate(1.1);
+	}
+	&:focus-visible {
+		outline-offset: 2px;
+	}
+}
+button.ghost {
+	background: none;
+	&:hover {
+		background: var(--gray-a3);
+	}
+	&:active {
+		background: var(--gray-a4);
+	}
+}
+button:disabled {
+	background: var(--gray-a3);
+	color: var(--gray-a8);
+}
+/* Size 1. */
+.panel button,
+.chips button {
+	gap: var(--space-1);
+	height: var(--space-5);
+	padding: 0 var(--space-2);
+	border-radius: var(--radius-1);
+	font-size: var(--font-size-1);
+	line-height: var(--line-height-1);
+	letter-spacing: var(--letter-spacing-1);
+}
+
+/* ------------------------------------------------------------------------
+ * Text Field and Select: variant surface, size 2. A ring of grey step 7, and
+ * the focus ring of the accent in its place.
+ * ---------------------------------------------------------------------- */
+input:not([type='range'], [type='color']),
+select,
+textarea {
+	height: var(--space-6);
+	min-width: 0;
+	padding: 0 calc(var(--space-2) - 1px);
+	border: 0;
+	border-radius: var(--radius-2);
+	background: var(--color-surface);
+	box-shadow: inset 0 0 0 1px var(--gray-a7);
+	color: var(--gray-12);
+	&::placeholder {
+		color: var(--gray-a10);
+	}
+	&::selection {
+		background: var(--accent-a5);
+	}
+	&:focus-visible {
+		outline: 2px solid var(--focus-8);
+		outline-offset: -1px;
+	}
+	&:disabled {
+		background: var(--gray-a2);
+		box-shadow: inset 0 0 0 1px var(--gray-a6);
+		color: var(--gray-a11);
+	}
+}
+input[type='number'] {
+	appearance: textfield;
+	font-variant-numeric: tabular-nums;
+	&::-webkit-inner-spin-button {
+		appearance: none;
+	}
+}
+/* The Select trigger: its arrow is drawn in the text colour. */
+select {
+	appearance: none;
+	padding-right: var(--space-5);
+	background-image:
+		linear-gradient(45deg, transparent 50%, currentColor 50%),
+		linear-gradient(135deg, currentColor 50%, transparent 50%);
+	background-position:
+		right 13px center,
+		right 9px center;
+	background-size: 4px 4px;
+	background-repeat: no-repeat;
+	&:hover {
+		box-shadow: inset 0 0 0 1px var(--gray-a8);
+	}
+}
+input[type='color'] {
+	width: var(--space-6);
+	height: var(--space-6);
+	padding: 0;
+	border: 0;
+	border-radius: var(--radius-2);
+	background: none;
+	box-shadow: inset 0 0 0 1px var(--gray-a7);
+	overflow: hidden;
+	&::-webkit-color-swatch-wrapper {
+		padding: 3px;
+	}
+	&::-webkit-color-swatch {
+		border: 0;
+		border-radius: var(--radius-1);
+	}
+	&::-moz-color-swatch {
+		border: 0;
+		border-radius: var(--radius-1);
+	}
+	&:focus-visible {
+		outline: 2px solid var(--focus-8);
+		outline-offset: -1px;
+	}
+}
+label {
+	color: var(--gray-a11);
+}
+
+/* ------------------------------------------------------------------------
+ * Slider: variant surface, size 1. A track with a ring, and a white thumb.
+ * ---------------------------------------------------------------------- */
+input[type='range'] {
+	--track: 6px;
+	appearance: none;
+	width: 120px;
+	height: var(--space-4);
+	margin: 0;
+	background: none;
+	&::-webkit-slider-runnable-track {
+		height: var(--track);
+		border-radius: var(--radius-full);
+		background: var(--gray-a3);
+		box-shadow: inset 0 0 0 1px var(--gray-a5);
+	}
+	&::-moz-range-track {
+		height: var(--track);
+		border-radius: var(--radius-full);
+		background: var(--gray-a3);
+		box-shadow: inset 0 0 0 1px var(--gray-a5);
+	}
+	&::-moz-range-progress {
+		height: var(--track);
+		border-radius: var(--radius-full);
+		background: var(--accent-9);
+	}
+	&::-webkit-slider-thumb {
+		appearance: none;
+		width: 13px;
+		height: 13px;
+		margin-top: -3.5px;
+		border-radius: var(--radius-full);
+		background: #fff;
+		box-shadow: 0 0 0 1px var(--black-a4);
+	}
+	&::-moz-range-thumb {
+		width: 13px;
+		height: 13px;
+		border: 0;
+		border-radius: var(--radius-full);
+		background: #fff;
+		box-shadow: 0 0 0 1px var(--black-a4);
+	}
+	&:focus-visible {
+		outline: 0;
+	}
+	&:focus-visible::-webkit-slider-thumb {
+		box-shadow:
+			0 0 0 1px var(--black-a4),
+			0 0 0 3px var(--accent-3),
+			0 0 0 5px var(--focus-8);
+	}
+	&:focus-visible::-moz-range-thumb {
+		box-shadow:
+			0 0 0 1px var(--black-a4),
+			0 0 0 3px var(--accent-3),
+			0 0 0 5px var(--focus-8);
+	}
+}
+
+/* ------------------------------------------------------------------------
+ * The window: a header, and cards (Card, variant surface) with space between
+ * them. The sizes of the three panels are `--left`, `--right` and `--bottom`
+ * (layout.tsx). The code panel is there while its button is pressed.
+ * ---------------------------------------------------------------------- */
+#app {
+	display: grid;
+	grid-template-columns: var(--left, 290px) minmax(0, 1fr) var(--right, 430px);
+	grid-template-rows: var(--space-7) minmax(0, 1fr) var(--space-8) var(--bottom, 300px);
+	gap: var(--gap);
+	height: 100%;
+	padding: var(--gap);
+	&:has(#toggle-code[aria-pressed='false']) {
+		grid-template-columns: var(--left, 290px) minmax(0, 1fr);
+		#code-panel,
+		.divider-right {
+			display: none;
+		}
+	}
+}
+.panel,
+#stage,
+#transport {
+	background: var(--color-panel-solid);
+	border-radius: var(--radius-4);
+	box-shadow: 0 0 0 1px var(--gray-a5);
+}
+.panel {
+	contain: layout paint style;
+	overflow: auto;
+	min-height: 0;
+}
+#inspector {
+	grid-area: 2 / 1;
+}
+#stage {
+	grid-area: 2 / 2;
+}
+#code-panel {
+	grid-area: 2 / 3;
+}
+#transport {
+	grid-row: 3;
+	grid-column: 1 / -1;
+}
+#timeline {
+	grid-row: 4;
+	grid-column: 1 / -1;
+}
+/* The playback bar and the timeline are one card: the bar reaches over the space between them. */
+#transport {
+	align-self: start;
+	height: calc(var(--space-8) + var(--gap));
+	padding-bottom: var(--gap);
+	border-radius: var(--radius-4) var(--radius-4) 0 0;
+	z-index: 1;
+	clip-path: inset(-1px -1px 0 -1px);
+}
+#timeline {
+	border-radius: 0 0 var(--radius-4) var(--radius-4);
+	clip-path: inset(0 -1px -1px -1px);
+}
+
+/* The header: the menus at its start, and the bar over its whole width, so that its buttons are in the middle. */
+#menu,
+#bar {
+	grid-row: 1;
+	grid-column: 1 / -1;
+	display: flex;
+	align-items: center;
+	white-space: nowrap;
+}
+#menu {
+	justify-self: start;
+	z-index: 1;
+	gap: 2px;
+}
+#bar,
+#transport {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	white-space: nowrap;
+	/* Equal sides keep the buttons in the centre whatever stands beside them. */
+	.side {
+		flex: 1 1 0;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--space-2);
+		min-width: 0;
+		&.start {
+			justify-content: flex-start;
+		}
+	}
+	.buttons {
+		display: flex;
+		gap: var(--space-1);
+	}
+	label {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+}
+
+/* ------------------------------------------------------------------------
+ * Dropdown Menu, size 2, variant solid. No script: a menu is a `popover`
+ * (it opens and closes on a click of its title, closes on Escape or a click
+ * outside, and is drawn above everything), placed under its title by CSS
+ * anchor positioning. A submenu is open while the pointer or the keyboard
+ * focus is in it. The item under the pointer is the highlighted one.
+ * ---------------------------------------------------------------------- */
+.menu {
+	/* Each menu has its own anchor, under the same name. */
+	anchor-scope: --menu;
+}
+/* The trigger: Button, variant ghost. */
+.menu-title {
+	anchor-name: --menu;
+	padding: 0 var(--space-2);
+	background: none;
+	color: var(--gray-12);
+	font-weight: var(--font-weight-regular);
+	&:hover,
+	.menu:has(> :popover-open) > & {
+		background: var(--gray-a3);
+	}
+}
+:is(.menu, .submenu) > .menu-items {
+	min-width: 220px;
+	padding: var(--space-2);
+	border: 0;
+	border-radius: var(--radius-4);
+	background: var(--color-panel-solid);
+	box-shadow: var(--shadow-5);
+	color: var(--gray-12);
+}
+.menu > .menu-items {
+	position-anchor: --menu;
+	inset: auto;
+	top: anchor(bottom);
+	left: anchor(left);
+	margin: var(--space-1) 0 0;
+	/* A popover clips what overflows it: submenus fly out of it. */
+	overflow: visible;
+	transform-origin: top left;
+	opacity: 0;
+	scale: 0.96;
+	transition:
+		opacity 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+		scale 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+		display 0.12s allow-discrete,
+		overlay 0.12s allow-discrete;
+	/* The way from the title to its menu, so that the pointer does not leave the bar on the way. */
+	&::before {
+		content: '';
+		position: absolute;
+		inset: calc(var(--space-1) * -1 - 1px) 0 auto;
+		height: calc(var(--space-1) + 1px);
+	}
+	&:popover-open {
+		opacity: 1;
+		scale: 1;
+		@starting-style {
+			opacity: 0;
+			scale: 0.96;
+		}
+	}
+}
+.submenu {
+	position: relative;
+	> .menu-items {
+		display: none;
+		position: absolute;
+		left: calc(100% + var(--space-1));
+		top: calc(var(--space-2) * -1);
+		min-width: 270px;
+		z-index: 1;
+	}
+	/* The way from the item to its submenu, so that the pointer does not leave on the way. */
+	&::after {
+		content: '';
+		position: absolute;
+		left: 100%;
+		top: 0;
+		width: var(--space-3);
+		height: 100%;
+	}
+	&:hover > .menu-items,
+	&:focus-within > .menu-items {
+		display: block;
+	}
+	&:hover > button,
+	&:focus-within > button {
+		background: var(--gray-a3);
+	}
+}
+.menu-items :is(button, a) {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-4);
+	width: 100%;
+	height: auto;
+	min-height: var(--space-6);
+	padding: 0 var(--space-3);
+	border-radius: var(--radius-2);
+	background: none;
+	color: inherit;
+	font-weight: var(--font-weight-regular);
+	text-align: left;
+	text-decoration: none;
+	cursor: default;
+	&:hover:not(:disabled),
+	&:focus-visible {
+		background: var(--accent-9);
+		color: var(--accent-contrast);
+		outline: 0;
+		small,
+		em {
+			color: inherit;
+		}
+	}
+	&:disabled {
+		background: none;
+		color: var(--gray-a8);
+		small {
+			color: inherit;
+		}
+	}
+	&.detailed {
+		padding-block: var(--space-1);
+		span {
+			display: flex;
+			flex-direction: column;
+		}
+	}
+}
+/* The shortcut, and the second line of an item. */
+.menu-items small,
+.menu-items em {
+	color: var(--gray-a11);
+	font-size: var(--font-size-1);
+	font-style: normal;
+	line-height: var(--line-height-1);
+	white-space: nowrap;
+}
+.menu-items hr {
+	height: 1px;
+	margin: var(--space-2) var(--space-3);
+	border: 0;
+	background: var(--gray-a6);
+}
+/* The label of a group. */
+.menu-items h4 {
+	display: flex;
+	align-items: center;
+	height: var(--space-6);
+	margin: 0;
+	padding: 0 var(--space-3);
+	color: var(--gray-a10);
+	font: inherit;
+	font-size: var(--font-size-1);
+}
+
+/* ------------------------------------------------------------------------
+ * Tabs, size 1: the name of a panel. The tab in use has the accent under it.
+ * ---------------------------------------------------------------------- */
+.tabs,
+#code-head {
+	display: flex;
+	align-items: center;
+	height: var(--space-6);
+	padding: 0 var(--space-2);
+	box-shadow: inset 0 -1px 0 0 var(--gray-a5);
+	font-size: var(--font-size-1);
+	line-height: var(--line-height-1);
+	white-space: nowrap;
+	user-select: none;
+}
+.tab,
+#code-head strong {
+	position: relative;
+	align-self: stretch;
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	padding: 0 var(--space-2);
+	color: var(--gray-12);
+	font-weight: var(--font-weight-medium);
+	letter-spacing: var(--tab-active-letter-spacing);
+	&::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 2px;
+		background: var(--accent-9);
+	}
+	small {
+		color: var(--gray-a10);
+		font-size: inherit;
+		font-weight: var(--font-weight-regular);
+	}
+}
+
+/* ------------------------------------------------------------------------
+ * Properties
+ * ---------------------------------------------------------------------- */
+#inspector {
+	> .tabs {
+		position: sticky;
+		top: 0;
+		z-index: 2;
+		background: var(--color-panel-solid);
+	}
+	> section,
+	> .hint,
+	> fieldset > section {
+		margin: var(--space-3);
+	}
+	section + section {
+		padding-top: var(--space-3);
+		border-top: 1px solid var(--gray-a5);
+	}
+	/* Heading, size 2. */
+	h3 {
+		margin: 0 0 var(--space-2);
+		font-size: var(--font-size-2);
+		font-weight: var(--font-weight-bold);
+	}
+	/* Fields in the panel are size 1. */
+	input:not([type='color']),
+	select {
+		height: var(--space-5);
+		padding-inline: calc(var(--space-1) * 1.5);
+		font-size: var(--font-size-1);
+		letter-spacing: var(--letter-spacing-1);
+	}
+	select {
+		padding-right: var(--space-4);
+		background-position:
+			right 10px center,
+			right 6px center;
+	}
+	input[type='color'] {
+		width: 100%;
+		height: var(--space-5);
+	}
+}
+.fields {
+	display: grid;
+	grid-template-columns: 48px minmax(0, 1fr) 44px minmax(0, 1fr);
+	gap: var(--space-2);
+	align-items: center;
+	font-size: var(--font-size-1);
+	.wide {
+		grid-column: 2 / -1;
+	}
+}
+.hint {
+	margin: var(--space-2) 0 0;
+	color: var(--gray-a11);
+	font-size: var(--font-size-1);
+	line-height: var(--line-height-1);
+	b {
+		color: var(--gray-12);
+		font-weight: var(--font-weight-medium);
+	}
+}
+#curve {
+	display: block;
+	width: 100%;
+	margin-top: var(--space-3);
+	border-radius: var(--radius-3);
+	background: var(--color-surface);
+	box-shadow: inset 0 0 0 1px var(--gray-a6);
+	touch-action: none;
+	user-select: none;
+	.unit {
+		fill: var(--gray-a2);
+		stroke: var(--gray-a6);
+	}
+	.grid {
+		stroke: var(--gray-a6);
+		stroke-dasharray: 2 3;
+	}
+	.shape {
+		fill: none;
+		stroke: var(--accent-9);
+		stroke-width: 2;
+	}
+	.arm {
+		stroke: var(--gray-9);
+	}
+	.handle {
+		fill: var(--color-panel-solid);
+		stroke: var(--gray-12);
+		cursor: grab;
+	}
+	.node {
+		fill: var(--key);
+		stroke: var(--color-panel-solid);
+		cursor: grab;
+		&.fixed {
+			fill: var(--gray-9);
+			cursor: default;
+		}
+	}
+	.dot {
+		fill: var(--gray-12);
+		pointer-events: none;
+	}
+	text {
+		fill: var(--gray-a10);
+		font-size: 9px;
+		pointer-events: none;
+	}
+}
+.chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1);
+	margin-top: var(--space-2);
+}
+
+/* ------------------------------------------------------------------------
+ * The stage. The composition is the artwork: it is dark in both themes.
+ * ---------------------------------------------------------------------- */
+#stage {
+	position: relative;
+	overflow: hidden;
+	> .tabs {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		z-index: 1;
+	}
+}
+#comp {
+	contain: layout paint style;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 640px;
+	height: 360px;
+	/* Below the tabs. */
+	margin: -164px 0 0 -320px;
+	background: #0e0f12;
+	box-shadow: var(--shadow-3);
+	overflow: hidden;
+}
+.shape-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	cursor: move;
+	will-change: transform, opacity;
+	touch-action: none;
+	user-select: none;
+	white-space: nowrap;
+	font-family: var(--default-font-family);
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: 0;
+	&.selected {
+		outline: 1px dashed #fff;
+		outline-offset: 3px;
+	}
+	/* A three.js scene whose code failed says why, over its layer. */
+	&[data-error]::after {
+		content: 'This scene stopped: ' attr(data-error);
+		position: absolute;
+		inset: 0;
+		display: grid;
+		place-items: center;
+		padding: var(--space-5);
+		background: rgb(0 0 0 / 0.8);
+		color: var(--red-9);
+		font: 12px / 1.5 var(--code-font-family);
+		white-space: pre-wrap;
+		text-align: center;
+	}
+}
+/* A three.js scene fills its layer. */
+.scene3d {
+	display: block;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+#path {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	overflow: visible;
+	polyline {
+		fill: none;
+		stroke: #fff;
+		stroke-opacity: 0.55;
+		stroke-dasharray: 3 4;
+	}
+	rect {
+		fill: var(--key);
+	}
+}
+
+/* ------------------------------------------------------------------------
+ * Code
+ * ---------------------------------------------------------------------- */
+#code-panel {
+	/* Its own layer: the playback moves other things every frame, and the coloured text is costly to paint again. */
+	will-change: transform;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+#code-head {
+	flex: none;
+	gap: var(--space-2);
+}
+/* Badge, size 1, variant soft: green, amber or red. */
+#code-status {
+	--tone: var(--green-a11);
+	--tint: var(--green-a3);
+	min-width: 0;
+	margin-right: auto;
+	padding: 2px 6px;
+	border-radius: var(--radius-1);
+	background: var(--tint);
+	color: var(--tone);
+	font-weight: var(--font-weight-medium);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	&.warn {
+		--tone: var(--amber-a11);
+		--tint: var(--amber-a3);
+	}
+	&.error {
+		--tone: var(--red-a11);
+		--tint: var(--red-a3);
+	}
+}
+#code {
+	flex: 1;
+	min-height: 0;
+	height: auto;
+	resize: none;
+	padding: var(--space-3);
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	font: 12px / 1.5 var(--code-font-family);
+	letter-spacing: 0;
+	tab-size: 2;
+	white-space: pre;
+	&:focus-visible {
+		outline: 0;
+	}
+}
+
+/* ------------------------------------------------------------------------
+ * Playback
+ * ---------------------------------------------------------------------- */
+#transport {
+	padding: 0 var(--space-2);
+	.tab {
+		margin-right: var(--space-2);
+	}
+	.tab::before {
+		bottom: 0;
+	}
+	.buttons button {
+		min-width: 86px;
+	}
+	label {
+		font-size: var(--font-size-1);
+	}
+}
+#duration {
+	width: 72px;
+}
+#time {
+	contain: layout paint style;
+	width: 128px;
+	color: var(--accent-a11);
+	font: var(--font-size-1) var(--code-font-family);
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+}
+
+/* ------------------------------------------------------------------------
+ * Timeline: rows as in Table, size 1.
+ * ---------------------------------------------------------------------- */
+#timeline {
+	position: relative;
+	overscroll-behavior: contain;
+	font-size: var(--font-size-1);
+	line-height: var(--line-height-1);
+	letter-spacing: var(--letter-spacing-1);
+}
+#rows {
+	position: relative;
+	min-width: 100%;
+	min-height: 100%;
+}
+.row {
+	display: flex;
+	height: var(--row);
+	box-shadow: inset 0 -1px 0 0 var(--gray-a4);
+	.label {
+		position: sticky;
+		left: 0;
+		z-index: 3;
+		flex: 0 0 var(--label);
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		padding: 0 var(--space-2);
+		background: var(--color-panel-solid);
+		box-shadow:
+			inset -1px 0 0 0 var(--gray-a5),
+			inset 0 -1px 0 0 var(--gray-a4);
+	}
+	.lane {
+		position: relative;
+		flex: 1;
+		margin-left: var(--pad);
+		background: repeating-linear-gradient(90deg, var(--gray-a3) 0 1px, transparent 1px var(--grid, 100px));
+	}
+}
+.row.ruler {
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	height: var(--space-6);
+	background: var(--color-panel-solid);
+	box-shadow: inset 0 -1px 0 0 var(--gray-a5);
+	.label {
+		z-index: 6;
+		gap: var(--space-1);
+		box-shadow:
+			inset -1px 0 0 0 var(--gray-a5),
+			inset 0 -1px 0 0 var(--gray-a5);
+	}
+	.lane {
+		background: none;
+		cursor: ew-resize;
+		touch-action: none;
+	}
+}
+.tick {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	padding: 9px 0 0 var(--space-1);
+	border-left: 1px solid var(--gray-a5);
+	color: var(--gray-a10);
+	font-size: 11px;
+	pointer-events: none;
+}
+.row.layer {
+	.label {
+		background: color-mix(in srgb, var(--gray-3) 60%, var(--color-panel-solid));
+		font-weight: var(--font-weight-medium);
+	}
+	.lane {
+		background: var(--gray-a2);
+	}
+	.name {
+		flex: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	&.selected .label {
+		background: color-mix(in srgb, var(--accent-4) 70%, var(--color-panel-solid));
+		box-shadow:
+			inset 2px 0 0 0 var(--accent-9),
+			inset -1px 0 0 0 var(--gray-a5),
+			inset 0 -1px 0 0 var(--gray-a4);
+	}
+}
+.swatch {
+	flex: none;
+	width: 12px;
+	height: 12px;
+	border-radius: var(--radius-1);
+	box-shadow: inset 0 0 0 1px var(--black-a3);
+}
+/* Icon Button, size 1, variant ghost. */
+.panel .icon {
+	width: var(--space-4);
+	height: var(--space-4);
+	padding: 0;
+	background: none;
+	color: var(--gray-a10);
+	&:hover {
+		background: var(--gray-a3);
+		color: var(--gray-12);
+	}
+}
+.row.prop {
+	.label {
+		padding-left: 34px;
+		span {
+			flex: 1;
+			color: var(--gray-a11);
+		}
+	}
+	&.selected .label span {
+		color: var(--gray-12);
+	}
+	/* A value looks like text until it is used. */
+	input {
+		width: 76px;
+		height: 20px;
+		padding: 0 var(--space-1);
+		background: none;
+		box-shadow: none;
+		color: var(--accent-a11);
+		font-size: var(--font-size-1);
+		text-align: right;
+		&:hover {
+			box-shadow: inset 0 0 0 1px var(--gray-a7);
+		}
+		&:focus-visible {
+			background: var(--color-surface);
+			color: var(--gray-12);
+		}
+	}
+}
+.panel .key-toggle {
+	width: var(--space-4);
+	height: var(--space-4);
+	padding: 0;
+	background: none;
+	color: var(--gray-a6);
+	font-size: 13px;
+	&.has {
+		color: var(--gray-a10);
+	}
+	&.on {
+		color: var(--key);
+	}
+	&:hover {
+		background: var(--gray-a3);
+	}
+}
+/* A layer is a bar of its colour, as long as the timeline. */
+.bar {
+	position: absolute;
+	left: 0;
+	top: 6px;
+	bottom: 6px;
+	border-radius: var(--radius-1);
+	opacity: 0.75;
+	box-shadow: inset 0 0 0 1px var(--black-a3);
+}
+.segment {
+	position: absolute;
+	top: calc(50% - 2px);
+	height: 4px;
+	background: var(--gray-a6);
+	pointer-events: none;
+	&.selected {
+		background: var(--amber-a8);
+	}
+}
+.keyframe {
+	position: absolute;
+	top: calc(50% - 5px);
+	width: 10px;
+	height: 10px;
+	margin-left: -5px;
+	transform: rotate(45deg);
+	border-radius: 1.5px;
+	background: var(--gray-11);
+	box-shadow: 0 0 0 1.5px var(--color-panel-solid);
+	cursor: ew-resize;
+	touch-action: none;
+	&:hover {
+		background: var(--gray-12);
+	}
+	&.selected {
+		background: var(--key);
+	}
+}
+.mark {
+	position: absolute;
+	top: calc(50% - 2.5px);
+	width: 5px;
+	height: 5px;
+	margin-left: -2.5px;
+	transform: rotate(45deg);
+	background: var(--gray-12);
+	opacity: 0.55;
+	pointer-events: none;
+}
+#playhead {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: calc(var(--label) + var(--pad));
+	width: 1px;
+	z-index: 2;
+	background: var(--head);
+	box-shadow: 0 0 0 0.5px var(--head);
+	will-change: transform;
+	pointer-events: none;
+}
+#ruler-head {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	margin-left: -6px;
+	border: 6px solid transparent;
+	border-top: 9px solid var(--head);
+	border-bottom: 0;
+	will-change: transform;
+	pointer-events: none;
+}
+
+/* ------------------------------------------------------------------------
+ * The dividers between the cards: they lie in the space between them. Drag
+ * one to resize the panel beside it (layout.tsx).
+ * ---------------------------------------------------------------------- */
+.divider {
+	position: relative;
+	z-index: 8;
+	touch-action: none;
+	&::after {
+		content: '';
+		position: absolute;
+		inset: 3px;
+		border-radius: var(--radius-full);
+		transition: background 0.1s;
+	}
+	&:hover::after,
+	&.dragging::after,
+	&:focus-visible::after {
+		background: var(--accent-9);
+	}
+	&:focus-visible {
+		outline: 0;
+	}
+}
+.divider-left,
+.divider-right {
+	grid-row: 2;
+	width: var(--gap);
+	cursor: col-resize;
+}
+.divider-left {
+	grid-column: 1;
+	justify-self: end;
+	margin-right: calc(var(--gap) * -1);
+}
+.divider-right {
+	grid-column: 3;
+	justify-self: start;
+	margin-left: calc(var(--gap) * -1);
+}
+.divider-bottom {
+	grid-row: 3;
+	grid-column: 1 / -1;
+	align-self: start;
+	height: var(--gap);
+	margin-top: calc(var(--gap) * -1);
+	cursor: row-resize;
+}
+.resizing-columns,
+.resizing-columns * {
+	cursor: col-resize !important;
+	user-select: none !important;
+}
+.resizing-rows,
+.resizing-rows * {
+	cursor: row-resize !important;
+	user-select: none !important;
+}
+
+/* ------------------------------------------------------------------------
+ * Dialog, size 3. The native element: modal, focus kept inside, closed by
+ * Escape. It comes in with @starting-style, with no script.
+ * ---------------------------------------------------------------------- */
+dialog {
+	width: min(450px, calc(100vw - var(--space-6)));
+	max-width: none;
+	max-height: calc(100vh - var(--space-8));
+	padding: var(--space-5);
+	border: 0;
+	border-radius: var(--radius-5);
+	background: var(--color-panel-solid);
+	box-shadow: var(--shadow-6);
+	color: var(--gray-12);
+	opacity: 0;
+	scale: 0.96;
+	translate: 0 4px;
+	transition:
+		opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+		scale 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+		translate 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+		display 0.2s allow-discrete,
+		overlay 0.2s allow-discrete;
+	&[open] {
+		opacity: 1;
+		scale: 1;
+		translate: 0;
+		@starting-style {
+			opacity: 0;
+			scale: 0.96;
+			translate: 0 4px;
+		}
+	}
+	&.wide {
+		width: min(760px, calc(100vw - var(--space-6)));
+	}
+	&::backdrop {
+		background: var(--color-overlay);
+		transition:
+			background 0.2s,
+			display 0.2s allow-discrete,
+			overlay 0.2s allow-discrete;
+	}
+	&[open]::backdrop {
+		@starting-style {
+			background: transparent;
+		}
+	}
+	/* Heading, size 5. */
+	h2 {
+		margin: 0 0 var(--space-3);
+		font-size: var(--font-size-5);
+		font-weight: var(--font-weight-bold);
+		line-height: var(--line-height-5);
+		letter-spacing: var(--letter-spacing-5);
+	}
+	p {
+		margin: 0 0 var(--space-3);
+		color: var(--gray-a11);
+		b {
+			color: var(--gray-12);
+			font-weight: var(--font-weight-medium);
+		}
+	}
+	a {
+		color: var(--accent-a11);
+		text-decoration-color: var(--accent-a5);
+		text-underline-offset: 0.15em;
+	}
+	label {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		margin: 0 0 var(--space-3);
+	}
+	input {
+		flex: 1;
+		&[type='number'] {
+			flex: 0 0 100px;
+		}
+	}
+	/* Code, variant soft. */
+	code {
+		padding: 0.1em 0.3em;
+		border-radius: var(--radius-1);
+		background: var(--accent-a3);
+		color: var(--accent-a11);
+		font: 0.9em var(--code-font-family);
+	}
+	pre,
+	textarea {
+		display: block;
+		margin: 0 0 var(--space-3);
+		padding: var(--space-3);
+		border-radius: var(--radius-3);
+		background: var(--gray-a2);
+		box-shadow: inset 0 0 0 1px var(--gray-a5);
+		font: 12px / 1.5 var(--code-font-family);
+		letter-spacing: 0;
+		tab-size: 2;
+	}
+	pre {
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+		&.scroll {
+			max-height: 46vh;
+			overflow: auto;
+			white-space: pre;
+		}
+		/* Callout, variant soft. */
+		&.error {
+			background: var(--red-a3);
+			box-shadow: none;
+			color: var(--red-a11);
+		}
+		&.warn {
+			background: var(--amber-a3);
+			box-shadow: none;
+			color: var(--amber-a11);
+		}
+	}
+	textarea {
+		width: 100%;
+		height: min(320px, 40vh);
+		resize: vertical;
+		white-space: pre;
+	}
+}
+/* The parts of a broken link, and how far it got. */
+.checks {
+	display: grid;
+	gap: var(--space-1);
+	margin: 0 0 var(--space-3);
+	padding: 0;
+	list-style: none;
+	li {
+		display: grid;
+		grid-template-columns: 24px 80px minmax(0, 1fr);
+		align-items: baseline;
+		padding: var(--space-2) var(--space-3);
+		border-radius: var(--radius-2);
+		background: var(--gray-a2);
+		&::before {
+			content: '·';
+			color: var(--gray-a9);
+		}
+		&[data-ok='true']::before {
+			content: '✓';
+			color: var(--green-a11);
+		}
+		&[data-ok='false'] {
+			background: var(--red-a3);
+			&::before {
+				content: '✕';
+				color: var(--red-a11);
+			}
+			span {
+				color: var(--red-a11);
+			}
+		}
+		span {
+			overflow-wrap: anywhere;
+			color: var(--gray-a11);
+		}
+	}
+}
+.dialog-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--space-3);
+	margin-top: var(--space-4);
+}
+.dialog-tools {
+	display: flex;
+	gap: var(--space-2);
+}
+
+/* A short message over the timeline, like Radix's Tooltip: the inverse of the page. */
+#toast {
+	position: fixed;
+	left: 50%;
+	bottom: calc(var(--bottom, 300px) + var(--space-8) + var(--space-4));
+	z-index: 30;
+	translate: -50% 0;
+	padding: var(--space-1) var(--space-3);
+	border-radius: var(--radius-2);
+	background: var(--gray-12);
+	color: var(--gray-1);
+	font-size: var(--font-size-1);
+	line-height: var(--line-height-2);
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.2s;
+	&.show {
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:is(#toast, dialog, dialog::backdrop, .menu > .menu-items, .divider::after) {
+		transition: none;
+	}
+}

@@ -1,0 +1,127 @@
+/*
+ * The design system: Radix (https://www.radix-ui.com), as CSS and nothing else.
+ *
+ * Radix's components are written for React and this editor for Solid, so what
+ * is used is what does not depend on either:
+ *
+ * - Radix Colors (`@radix-ui/colors`), twelve steps per scale: 1-2 backgrounds,
+ *   3-5 controls (at rest, under the pointer, pressed), 6-8 borders, 9-10 solid
+ *   colours, 11-12 text. The `a` steps are the same colours as transparency.
+ *   `scripts/radix-scales.mjs` joins each light and dark file into
+ *   `radix-scales.css` with `light-dark()`: the page's `color-scheme` picks.
+ * - The space, type, radius and shadow scales of Radix Themes, under its names.
+ *
+ * As in Radix Themes the interface uses two aliases, `--gray-*` (slate) and
+ * `--accent-*` (indigo): change them and everything is recoloured.
+ */
+@import './radix-scales.css';
+
+:root {
+	color-scheme: light dark;
+
+	--gray-1: var(--slate-1);
+	--gray-2: var(--slate-2);
+	--gray-3: var(--slate-3);
+	--gray-4: var(--slate-4);
+	--gray-5: var(--slate-5);
+	--gray-6: var(--slate-6);
+	--gray-7: var(--slate-7);
+	--gray-8: var(--slate-8);
+	--gray-9: var(--slate-9);
+	--gray-10: var(--slate-10);
+	--gray-11: var(--slate-11);
+	--gray-12: var(--slate-12);
+	--gray-a1: var(--slate-a1);
+	--gray-a2: var(--slate-a2);
+	--gray-a3: var(--slate-a3);
+	--gray-a4: var(--slate-a4);
+	--gray-a5: var(--slate-a5);
+	--gray-a6: var(--slate-a6);
+	--gray-a7: var(--slate-a7);
+	--gray-a8: var(--slate-a8);
+	--gray-a9: var(--slate-a9);
+	--gray-a10: var(--slate-a10);
+	--gray-a11: var(--slate-a11);
+	--gray-a12: var(--slate-a12);
+
+	--accent-1: var(--indigo-1);
+	--accent-2: var(--indigo-2);
+	--accent-3: var(--indigo-3);
+	--accent-4: var(--indigo-4);
+	--accent-5: var(--indigo-5);
+	--accent-6: var(--indigo-6);
+	--accent-7: var(--indigo-7);
+	--accent-8: var(--indigo-8);
+	--accent-9: var(--indigo-9);
+	--accent-10: var(--indigo-10);
+	--accent-11: var(--indigo-11);
+	--accent-12: var(--indigo-12);
+	--accent-a3: var(--indigo-a3);
+	--accent-a4: var(--indigo-a4);
+	--accent-a5: var(--indigo-a5);
+	--accent-a11: var(--indigo-a11);
+	--accent-contrast: #fff;
+	--focus-8: var(--accent-8);
+
+	/* Backgrounds: the page, panels over it, the inside of form controls, and what dims the page under a dialog. */
+	--color-background: var(--gray-1);
+	--color-panel-solid: light-dark(#fff, var(--gray-2));
+	--color-surface: light-dark(rgb(255 255 255 / 0.85), rgb(0 0 0 / 0.25));
+	--color-overlay: light-dark(var(--black-a6), var(--black-a8));
+
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-5: 24px;
+	--space-6: 32px;
+	--space-7: 40px;
+	--space-8: 48px;
+
+	--font-size-1: 12px;
+	--font-size-2: 14px;
+	--font-size-5: 20px;
+	--line-height-1: 16px;
+	--line-height-2: 20px;
+	--line-height-5: 28px;
+	--letter-spacing-1: 0.0025em;
+	--letter-spacing-2: 0em;
+	--letter-spacing-5: -0.005em;
+	--tab-active-letter-spacing: -0.01em;
+	--font-weight-regular: 400;
+	--font-weight-medium: 500;
+	--font-weight-bold: 700;
+	--default-font-family:
+		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'Open Sans', system-ui, sans-serif;
+	--code-font-family: Menlo, Consolas, 'Bitstream Vera Sans Mono', ui-monospace, monospace;
+
+	--radius-1: 3px;
+	--radius-2: 4px;
+	--radius-3: 6px;
+	--radius-4: 8px;
+	--radius-5: 12px;
+	--radius-6: 16px;
+	--radius-full: 9999px;
+
+	/* 3: panels on the page. 5: menus and other small overlays. 6: dialogs. */
+	--shadow-ring: light-dark(var(--gray-a3), var(--gray-a6));
+	--shadow-3:
+		0 0 0 1px var(--shadow-ring), 0 2px 3px -2px var(--gray-a3),
+		0 3px 12px -4px light-dark(var(--black-a2), var(--black-a6)),
+		0 4px 16px -8px light-dark(var(--black-a2), var(--black-a7));
+	--shadow-5:
+		0 0 0 1px var(--shadow-ring), 0 12px 60px light-dark(var(--black-a3), var(--black-a5)),
+		0 12px 32px -16px light-dark(var(--gray-a5), var(--black-a7));
+	--shadow-6:
+		0 0 0 1px var(--shadow-ring), 0 12px 60px light-dark(var(--black-a3), var(--black-a4)),
+		0 16px 64px light-dark(var(--gray-a2), var(--black-a6)),
+		0 16px 36px -20px light-dark(var(--gray-a7), var(--black-a11));
+}
+
+/* The theme switcher: nothing chosen follows the system, a choice (see theme.ts) overrides it. */
+:root[data-theme='light'] {
+	color-scheme: light;
+}
+:root[data-theme='dark'] {
+	color-scheme: dark;
+}
