@@ -7,6 +7,8 @@
  * from: dragging a divider writes one variable per frame, and nothing is
  * rendered again by Solid.
  */
+import {embedded} from './embed'
+
 export type Side = 'left' | 'right' | 'bottom'
 
 export const LAYOUT_KEY = 'tweenjs-timeline-editor-layout'
@@ -35,6 +37,7 @@ function show() {
 }
 
 function save() {
+	if (embedded) return
 	try {
 		localStorage.setItem(LAYOUT_KEY, JSON.stringify(sizes))
 	} catch {
@@ -53,7 +56,7 @@ export function setPanelSize(side: Side, size: number, remember = true) {
 }
 
 try {
-	const stored = JSON.parse(localStorage.getItem(LAYOUT_KEY) ?? '{}') as Partial<Record<Side, unknown>>
+	const stored = JSON.parse((!embedded && localStorage.getItem(LAYOUT_KEY)) || '{}') as Partial<Record<Side, unknown>>
 	for (const side of Object.keys(sizes) as Side[]) {
 		const size = stored[side]
 		if (typeof size === 'number' && Number.isFinite(size)) sizes[side] = Math.max(SMALLEST[side], size)

@@ -7,6 +7,8 @@
  * system's. `system` has no attribute. A few lines in `index.html` set the
  * attribute before the first paint, so the page never flashes the wrong theme.
  */
+import {embedded} from './embed'
+
 export type Theme = 'system' | 'light' | 'dark'
 export const THEMES: Theme[] = ['system', 'light', 'dark']
 export const THEME_KEY = 'tweenjs-timeline-editor-theme'
@@ -29,6 +31,7 @@ export function applyTheme(theme: Theme) {
 /** Shows a theme and remembers it, for the editor and its docs page. */
 export function saveTheme(theme: Theme) {
 	applyTheme(theme)
+	if (embedded) return
 	try {
 		if (theme === 'system') localStorage.removeItem(THEME_KEY)
 		else localStorage.setItem(THEME_KEY, theme)
@@ -38,3 +41,7 @@ export function saveTheme(theme: Theme) {
 }
 
 applyTheme(storedTheme())
+// A choice made in another page of this site (the docs, another tab) is followed here.
+addEventListener('storage', event => {
+	if (event.key === THEME_KEY || event.key === null) applyTheme(storedTheme())
+})

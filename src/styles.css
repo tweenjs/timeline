@@ -1383,3 +1383,43 @@ dialog {
 		transition: none;
 	}
 }
+
+/* ------------------------------------------------------------------------
+ * The editor inside another page (embed.ts): all of it, or one part of it,
+ * filling the frame.
+ * ---------------------------------------------------------------------- */
+html[data-embed]:not([data-embed='window']) #app {
+	display: flex;
+	flex-direction: column;
+}
+html[data-embed='stage'] #app > :not(#stage),
+html[data-embed='properties'] #app > :not(#inspector),
+html[data-embed='code'] #app > :not(#code-panel),
+html[data-embed='transport'] #app > :not(#transport),
+html[data-embed='timeline'] #app > :not(#transport, #timeline),
+html[data-embed='menu'] #app > :not(#menu) {
+	display: none;
+}
+html[data-embed='stage'] #stage,
+html[data-embed='properties'] #inspector,
+html[data-embed='code'] #code-panel,
+html[data-embed='timeline'] #timeline {
+	flex: 1;
+	min-height: 0;
+}
+html[data-embed='timeline'] #app {
+	gap: 0;
+}
+html[data-embed='transport'] #transport {
+	height: var(--space-8);
+	padding-bottom: 0;
+	border-radius: var(--radius-4);
+	clip-path: none;
+}
+html[data-embed='menu'] #menu {
+	position: static;
+}
+/* A submenu that the address asks to have open. */
+.submenu.open > .menu-items {
+	display: block;
+}

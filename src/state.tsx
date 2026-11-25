@@ -1,4 +1,5 @@
 import {VERSION} from '@tweenjs/tween.js'
+import {embedded, embedQuery} from './embed'
 import {createSignal, createStore, flush, snapshot} from 'solid-js'
 import type {JSX} from '@solidjs/web'
 import {generateCode, normalizeDoc, parseCode, syntaxProblem, type Parsed} from './model/compiler'
@@ -40,6 +41,8 @@ export const snap = (time: number) => Math.round(time / SNAP) * SNAP
 export const round = (value: number) => +value.toFixed(3)
 
 function load(): Doc | null {
+	// An embedded editor starts from the demo, not from the user's saved timeline.
+	if (embedded) return null
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY)
 		return raw ? normalizeDoc(JSON.parse(raw)) : null
@@ -112,6 +115,7 @@ function remember(before = JSON.stringify(current)) {
 
 function save() {
 	unsaved = false
+	if (embedded) return
 	try {
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(current))
 	} catch {
@@ -562,7 +566,11 @@ export function codeTyped() {
 
 let toastTimer = 0
 
+/** Set while an embedded editor is being set up: what it does then is not news. */
+let quiet = false
+
 export function toast(message: string) {
+	if (quiet) return
 	clearTimeout(toastTimer)
 	setUi(state => {
 		state.toast = message
@@ -1111,9 +1119,40 @@ export function onKeyDown(event: KeyboardEvent) {
 	event.preventDefault()
 }
 
+/** What the address of an embedded editor asks for: see embed.ts. */
+function applyEmbed() {
+	const query = embedQuery
+	quiet = true
+	const template = query.get('template')
+	if (template) actions['template:' + template]?.()
+
+	const layer = current.layers.findIndex(item => item.name === query.get('select'))
+	if (layer !== -1) {
+		const prop = query.get('prop') as Prop | null
+		select(layer, prop && PROPS.includes(prop) ? prop : null, prop ? Number(query.get('key') ?? 0) : -1)
+	}
+	const seek = query.get('seek')
+	if (seek !== null) player.seek(Number(seek) || 0)
+	if (query.has('play')) actions.play()
+	for (const name of query.get('do')?.split(',') ?? []) actions[name]?.()
+	quiet = false
+
+	// The menus are drawn by now: open the one that is asked for.
+	const title = query.get('menu')
+	if (title) {
+		requestAnimationFrame(() => {
+			const open = [...document.querySelectorAll<HTMLElement>('.menu-title')].find(item => item.textContent === title)
+			const sub = query.get('sub')
+			if (sub) document.querySelector(`[data-submenu="${sub}"]`)?.parentElement?.classList.add('open')
+			;(open?.nextElementSibling as HTMLElement | null)?.showPopover()
+		})
+	}
+}
+
 /** Shows the document that was loaded. Call once, after the first render. */
 export function start() {
 	player.loop = ui.loop
 	commit()
+	if (embedded) applyEmbed()
 	void openSharedLink()
 }
