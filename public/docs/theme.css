@@ -317,3 +317,34 @@ figcaption {
 .sidebar .docs-tools a.open-editor {
 	color: #fff;
 }
+
+/* The real editor in the page: <div data-editor> (see widgets.js). */
+.demo .spacer {
+	flex: 1;
+}
+.demo.embed > header a {
+	color: var(--accent-text);
+	font-size: 13px;
+}
+.demo.embed .frame {
+	position: relative;
+	width: 100%;
+	min-height: 120px;
+	overflow: hidden;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	background: var(--color-bg);
+}
+.demo.embed .frame iframe {
+	position: absolute;
+	left: 0;
+	top: 0;
+	border: 0;
+	transform-origin: 0 0;
+}
+.demo.embed .frame .loading {
+	margin: 0;
+	padding: 24px;
+	color: var(--muted);
+	font-size: 13px;
+}

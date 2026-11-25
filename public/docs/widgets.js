@@ -5,6 +5,7 @@
  * Markup in the markdown pages:
  *   ```js … ```                 code; a whole timeline (it has `export const timeline`) also gets Open in editor
  *   <div data-easing="x1 y1 x2 y2" data-editable data-title="…"></div>   a cubic-bezier you can drag
+ *   <div data-editor="timeline" data-width="1200" data-height="360" …></div>   the real editor, or a part of it (see editorDemo)
  *   <div data-timeline data-title="…"><script type="application/json">{…}</script></div>   a small timeline to play
  *                               (tracks: [[t, value, easing of the segment that starts here], …])
  */
@@ -527,6 +528,71 @@
 		sidebar.prepend(el('div', {class: 'docs-tools'}, [editor, select]))
 	}
 
+	// ----- The real editor, in the page. -----
+	// <div data-editor="timeline" data-width="1200" data-height="360" data-title="…" …></div>
+	// Attributes: data-editor (the part to show: window, stage, properties, timeline, transport, code, menu),
+	// data-width/data-height (the size it is laid out at, in px: it is scaled down to fit the page),
+	// data-template, data-select, data-prop, data-key, data-seek, data-play, data-menu, data-sub, data-do
+	// (see src/embed.ts), and data-code (code of a timeline to open as a shared link, which asks first).
+	var PARAMS = ['template', 'select', 'prop', 'key', 'seek', 'play', 'menu', 'sub', 'do']
+	function editorDemo(root) {
+		var view = root.dataset.editor
+		var W = +root.dataset.width || 1200
+		var H = +root.dataset.height || 600
+		var query = ['embed=' + encodeURIComponent(view)]
+		PARAMS.forEach(function (name) {
+			if (root.hasAttribute('data-' + name))
+				query.push(name + '=' + encodeURIComponent(root.getAttribute('data-' + name)))
+		})
+		var hash = root.dataset.code ? '#' + encodeCode(root.dataset.code) : ''
+		var src = EDITOR + 'index.html?' + query.join('&') + hash
+
+		var frame = el('div', {class: 'frame'}, [el('p', {class: 'loading', text: 'Loading the editor…'})])
+		var reset = el('button', {type: 'button', text: 'Reset', title: 'Start this example again'})
+		var full = el('a', {href: EDITOR + hash, target: '_blank', rel: 'noopener', text: 'Open the full editor'})
+		root.classList.add('demo', 'embed')
+		root.append(
+			el('header', {}, [
+				el('b', {text: root.dataset.title || 'The editor'}),
+				document.createTextNode(' · this is the real editor: try it'),
+				el('span', {class: 'spacer'}),
+				reset,
+				full,
+			]),
+			frame,
+		)
+
+		var iframe = null
+		function fit() {
+			var scale = Math.min(1, frame.clientWidth / W)
+			frame.style.height = H * scale + 'px'
+			if (iframe) iframe.style.transform = 'scale(' + scale + ')'
+		}
+		function load() {
+			if (iframe) iframe.remove()
+			iframe = el('iframe', {title: root.dataset.title || 'The timeline editor', src: src, width: W, height: H})
+			iframe.style.width = W + 'px'
+			iframe.style.height = H + 'px'
+			frame.append(iframe)
+			fit()
+		}
+		reset.addEventListener('click', load)
+		if ('ResizeObserver' in window) new ResizeObserver(fit).observe(frame)
+		fit()
+		// Only an editor that is near the screen is started: each one is a whole editor.
+		if ('IntersectionObserver' in window) {
+			var seen = new IntersectionObserver(
+				function (entries) {
+					if (!entries[0].isIntersecting) return
+					seen.disconnect()
+					load()
+				},
+				{rootMargin: '300px'},
+			)
+			seen.observe(root)
+		} else load()
+	}
+
 	function plugin(hook) {
 		hook.doneEach(function () {
 			chooser()
@@ -535,6 +601,11 @@
 				if (root.dataset.ready) return
 				root.dataset.ready = '1'
 				easingDemo(root)
+			})
+			document.querySelectorAll('.markdown-section [data-editor]').forEach(function (root) {
+				if (root.dataset.ready) return
+				root.dataset.ready = '1'
+				editorDemo(root)
 			})
 			document.querySelectorAll('.markdown-section [data-timeline]').forEach(function (root) {
 				if (root.dataset.ready) return
