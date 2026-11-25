@@ -1,0 +1,7 @@
+node_modules
+dist
+test-results
+playwright-report
+.browsers
+# Copied from node_modules/docsify by `bun run sync-helper`.
+public/docs/vendor
