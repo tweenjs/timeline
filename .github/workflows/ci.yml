@@ -2,6 +2,10 @@ name: CI
 
 # Builds the editor and its docs, and publishes them to
 # https://tweenjs.github.io/timeline/ from `main`.
+#
+# Only the default GITHUB_TOKEN is used (no personal access token). That token
+# cannot switch GitHub Pages on, so once, in the repository:
+#   Settings -> Pages -> Build and deployment -> Source: "GitHub Actions"
 on:
   push:
     branches: [main]
@@ -20,7 +24,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - name: Format
@@ -32,7 +36,7 @@ jobs:
       - name: Build
         run: bun run build
       - name: Upload the site
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
@@ -40,7 +44,7 @@ jobs:
     name: End-to-end tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bunx playwright install --with-deps chromium
@@ -48,7 +52,7 @@ jobs:
       - run: bun run test-e2e
       - name: Keep the report of a failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: |
@@ -58,7 +62,7 @@ jobs:
 
   deploy:
     name: Deploy to GitHub Pages
-    needs: build
+    needs: [build, e2e]
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -68,5 +72,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # Fails early, with a message that says what to do, when Pages is off.
+      - uses: actions/configure-pages@v6
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
