@@ -1,0 +1,85 @@
+/*
+ * Syntax colours of the Code box (src/highlight/mirror.ts). The text is drawn
+ * by `#code-mirror`, behind the textarea, and coloured by the `::highlight()`
+ * pseudo-elements below: Radix Colors, step 11 (text on the panel), so each
+ * has the contrast Radix promises, in the light theme and in the dark one.
+ */
+#code-box {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	/* The textarea is the one that scrolls, the mirror follows it. */
+	overflow: hidden;
+}
+#code-box > #code,
+#code-mirror {
+	font: 12px / 1.5 var(--code-font-family);
+	font-kerning: none;
+	font-variant-ligatures: none;
+	letter-spacing: 0;
+	tab-size: 2;
+	white-space: pre;
+	text-align: left;
+	padding: var(--space-3);
+}
+#code-box > #code {
+	position: relative;
+	flex: 1;
+	width: 100%;
+	min-width: 0;
+}
+#code-mirror {
+	position: absolute;
+	inset: 0;
+	margin: 0;
+	overflow: hidden;
+	/* The room of the textarea's scrollbars, so that the end of the code lines up when scrolled to it. */
+	padding-right: calc(var(--space-3) + 16px);
+	padding-bottom: calc(var(--space-3) + 16px);
+	color: var(--gray-12);
+	pointer-events: none;
+	user-select: none;
+}
+/* Only once the colours are there is the textarea's own text hidden: until then (and where they cannot be) it is plain text. */
+#code-box.highlighted > #code {
+	color: transparent;
+	caret-color: var(--gray-12);
+	&::selection {
+		background: var(--accent-a5);
+		color: transparent;
+	}
+}
+
+::highlight(code-kw) {
+	color: var(--purple-11);
+}
+::highlight(code-str) {
+	color: var(--green-11);
+}
+::highlight(code-esc) {
+	color: var(--cyan-11);
+}
+::highlight(code-num),
+::highlight(code-atom) {
+	color: var(--orange-11);
+}
+::highlight(code-com) {
+	color: var(--gray-a10);
+}
+::highlight(code-prop) {
+	color: var(--cyan-11);
+}
+::highlight(code-def),
+::highlight(code-fn) {
+	color: var(--indigo-11);
+}
+::highlight(code-type) {
+	color: var(--amber-11);
+}
+::highlight(code-op) {
+	color: var(--gray-a11);
+}
+::highlight(code-punct) {
+	color: var(--gray-a11);
+}
